@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atividade 1</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <header>
+        <h1>Página Atividade 1</h1>
+        <button id="mudarCor">Mudar Cor do Header</button>
+        <nav>
+            <ul>
+                <li><a href="#">Início</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+
+        <section id="teste-section">
+            <h2>Esse é um teste de section!</h2>
+            <p>Teste utilizando section</p>
+        </section>
+
+        <section id="lista">
+            <h2>Lista de Itens</h2>
+            <input type="text" id="novoItem" placeholder="Digite um item">
+            <button id="adicionarItem">Adicionar Item</button>
+            <ul id="listaItens"></ul>
+        </section>
+
+        <section id="mensagemSection">
+            <h2>Mensagem:</h2>
+            <div id="mensagem"></div>
+        </section>
+
+        <section id="formPost">
+            <h2>Formulário:</h2>
+            <form id="formulario">
+                <label for="nome">Nome:</label>
+                <input type="text" placeholder="EX: João Bobão" id="nome">
+                <br>
+                <br>
+
+                <label for="email">E-mail:</label>
+                <input type="text" placeholder="EX: gilgameplays@email.com" id="email">
+                <br>
+                <br>
+
+                <button type="submit">Enviar</button>
+            </form>
+            <div id="resposta"></div>
+        </section>
+
+        <section id="tabelaSection">
+            <h2>Lista de Usuários:</h2>
+            <button id="filtrar">Mostrar maiores de 18 anos</button>
+            <button id="resetar">Mostrar todos</button>
+            <table id="tabelaUsuarios" border="1">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>E-mail</th>
+                        <th>Idade</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dados no JavaScript -->
+                </tbody>
+            </table>
+        </section>
+
+        <section id="addUsuario">
+            <h2>Adicionar Usuário:</h2>
+            <form id="formularioAdd">
+                <label for="nome">Nome:</label>
+                <input type="text" placeholder="EX: João Bobão" id="nomeAdd" required>
+
+                <label for="email">E-mail:</label>
+                <input type="email" placeholder="EX: gilgameplays@email.com" id="emailAdd" required>
+
+                <label for="idade">Idade:</label>
+                <input type="number" placeholder="EX: 23" id="idadeAdd" required>
+
+                <button type="submit">Adicionar</button>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        <p>Olá, eu sou um footer!</p>
+    </footer>
+
+    <script>
+        //JavaScript
+
+        //Botão Mudar de Cor
+        document.getElementById("mudarCor").addEventListener("click", function () {
+            document.querySelector("header").style.backgroundColor = "black"
+        });
+
+        //Lista de itens
+        document.getElementById("adicionarItem").addEventListener("click", function () {
+            let item = document.getElementById("novoItem");
+            let texto = item.value.trim();
+            if (texto !== "") {
+                let li = document.createElement("li");
+                li.textContent = texto;
+                li.addEventListener("dblclick", function () {
+                    this.remove();
+                });
+                document.getElementById("listaItens").appendChild(li);
+                item.value = "";
+            }
+        });
+
+        //Método GET
+        fetch("https://demo7531829.mockable.io/")
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('mensagem').textContent = data.mensagem;
+            })
+            .catch(error => console.log(error))
+
+        //Método POST
+        document.getElementById("formulario").addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            const nomeInput = document.getElementById("nome");
+            const emailInput = document.getElementById("email");
+
+            const nome = nomeInput.value.trim();
+            const email = emailInput.value.trim();
+
+            let valido = true;
+
+            // Remove spans de erro antes de validar novamente
+            document.querySelectorAll("#formulario span").forEach(span => span.remove());
+
+            function exibirErro(input, mensagem) {
+                let spanErro = input.nextElementSibling;
+                if (!spanErro || spanErro.tagName !== "SPAN") {
+                    spanErro = document.createElement("span");
+                    spanErro.style.color = "red";
+                    spanErro.style.marginLeft = "10px";
+                    input.parentNode.insertBefore(spanErro, input.nextSibling);
+                }
+                spanErro.textContent = mensagem;
+            }
+
+            if (!nome) {
+                exibirErro(nomeInput, "Nome vazio!");
+                valido = false;
+            }
+
+            if (!email) {
+                exibirErro(emailInput, "E-mail vazio!");
+                valido = false;
+            } else if (!email.includes("@") || !email.includes(".")) {
+                exibirErro(emailInput, "E-mail inválido!");
+                valido = false;
+            }
+
+            if (!valido) {
+                return;
+            }
+
+            const dados = {
+                nome: nome,
+                email: email
+            };
+
+            console.log("Dados enviados:", dados);
+
+            fetch("https://demo7531829.mockable.io/post", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(dados)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("resposta").textContent = data.mensagem;
+                })
+                .catch(error => console.log(error));
+
+            // Resetar os campos após envio bem-sucedido
+            nomeInput.value = "";
+            emailInput.value = "";
+        });
+
+
+        //Lista com GET, POST, UPDATE e DELETE
+        let usuarios = [];
+
+        function carregarUsuarios() {
+            fetch("https://demo7531829.mockable.io/usuarios")
+                .then(response => response.json())
+                .then(data => {
+                    usuarios = data;
+                    exibirUsuarios(usuarios);
+                })
+                .catch(error => console.log(error));
+        }
+
+        function exibirUsuarios(lista) {
+            const tbody = document.querySelector("#tabelaUsuarios tbody");
+            tbody.innerHTML = "";
+
+            lista.forEach((usuario, index) => {
+                let tr = document.createElement("tr");
+
+                let tdNome = document.createElement("td");
+                tdNome.textContent = usuario.nome;
+
+                let tdEmail = document.createElement("td");
+                tdEmail.textContent = usuario.email;
+
+                let tdIdade = document.createElement("td");
+                tdIdade.textContent = usuario.idade;
+
+                let tdAcoes = document.createElement("td");
+
+                let btnEditar = document.createElement("button");
+                btnEditar.textContent = "Editar";
+                btnEditar.addEventListener("click", function () {
+                    editarUsuario(index);
+                });
+
+                let btnExcluir = document.createElement("button");
+                btnExcluir.textContent = "Excluir";
+                btnExcluir.addEventListener("click", function () {
+                    excluirUsuario(index);
+                });
+
+                tdAcoes.appendChild(btnEditar);
+                tdAcoes.appendChild(btnExcluir);
+
+                tr.appendChild(tdNome);
+                tr.appendChild(tdEmail);
+                tr.appendChild(tdIdade);
+                tr.appendChild(tdAcoes);
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        document.getElementById("filtrar").addEventListener("click", function () {
+            const maior18 = usuarios.filter(usuario => usuario.idade >= 18);
+            exibirUsuarios(maior18);
+        });
+
+        document.getElementById("resetar").addEventListener("click", function () {
+            exibirUsuarios(usuarios);
+        });
+
+        function editarUsuario(index) {
+            let novoNome = prompt("Digite o novo nome:", usuarios[index].nome);
+            if (novoNome) {
+                usuarios[index].nome = novoNome;
+                exibirUsuarios(usuarios);
+                alert("Nome alterado!")
+            }
+        }
+
+        function excluirUsuario(index) {
+            if (confirm("Excluir esse usuário?")) {
+                usuarios.splice(index, 1);
+                exibirUsuarios(usuarios);
+                alert("Usuário removido!")
+            }
+        }
+
+        document.getElementById("formularioAdd").addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            const nome = document.getElementById("nomeAdd").value.trim();
+            const email = document.getElementById("emailAdd").value.trim();
+            const idade = document.getElementById("idadeAdd").value.trim();
+
+            const novoUsuario = {
+                nome,
+                email,
+                idade
+            };
+
+            usuarios.push(novoUsuario);
+            exibirUsuarios(usuarios);
+
+            fetch("https://demo7531829.mockable.io/adicionarUsuario", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(novoUsuario)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Usuario adicionado:", data);
+                    alert("Usuário adicionado!");
+                })
+                .catch(error => console.log(error));
+
+            document.getElementById("nomeAdd").value = "";
+            document.getElementById("emailAdd").value = "";
+            document.getElementById("idadeAdd").value = "";
+        });
+
+        carregarUsuarios();
+    </script>
+</body>
+
+</html>
