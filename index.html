@@ -121,7 +121,7 @@
         });
 
         //Método GET
-        fetch("https://demo7531829.mockable.io/")
+        fetch("http://demo7531829.mockable.io/")
             .then(response => response.json())
             .then(data => {
                 document.getElementById('mensagem').textContent = data.mensagem;
@@ -140,7 +140,6 @@
 
             let valido = true;
 
-            // Remove spans de erro antes de validar novamente
             document.querySelectorAll("#formulario span").forEach(span => span.remove());
 
             function exibirErro(input, mensagem) {
@@ -178,7 +177,7 @@
 
             console.log("Dados enviados:", dados);
 
-            fetch("https://demo7531829.mockable.io/post", {
+            fetch("http://demo7531829.mockable.io/post", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
@@ -191,7 +190,6 @@
                 })
                 .catch(error => console.log(error));
 
-            // Resetar os campos após envio bem-sucedido
             nomeInput.value = "";
             emailInput.value = "";
         });
@@ -201,10 +199,12 @@
         let usuarios = [];
 
         function carregarUsuarios() {
-            fetch("https://demo7531829.mockable.io/usuarios")
+            fetch("http://demo7531829.mockable.io/usuarios")
                 .then(response => response.json())
                 .then(data => {
                     usuarios = data;
+                    const usuariosAdicionados = JSON.parse(localStorage.getItem("usuariosAdicionados")) || [];
+                    usuarios = [...data, ...usuariosAdicionados];
                     exibirUsuarios(usuarios);
                 })
                 .catch(error => console.log(error));
@@ -294,7 +294,11 @@
             usuarios.push(novoUsuario);
             exibirUsuarios(usuarios);
 
-            fetch("https://demo7531829.mockable.io/adicionarUsuario", {
+            let usuariosAdicionados = JSON.parse(localStorage.getItem("usuariosAdicionados")) || [];
+            usuariosAdicionados.push(novoUsuario);
+            localStorage.setItem("usuariosAdicionados", JSON.stringify(usuariosAdicionados));
+
+            fetch("http://demo7531829.mockable.io/adicionarUsuario", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
